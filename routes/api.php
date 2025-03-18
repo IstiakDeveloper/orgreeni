@@ -182,8 +182,12 @@ Route::group(['prefix' => 'v1/admin', 'middleware' => ['auth:sanctum', 'admin']]
     Route::get('products/export', [AdminProductController::class, 'export']);
     Route::post('products/{id}/images', [AdminProductController::class, 'uploadImages']);
     Route::delete('products/{id}/images/{imageId}', [AdminProductController::class, 'deleteImage']);
+    Route::get('products/dropdowns-data', [AdminProductController::class, 'getDropdownsData']);
+
+
 
     // Categories Management
+    Route::get('categories/parents-dropdown', [AdminCategoryController::class, 'getParentsForDropdown']);
     Route::resource('categories', AdminCategoryController::class);
     Route::post('categories/{id}/status', [AdminCategoryController::class, 'updateStatus']);
 

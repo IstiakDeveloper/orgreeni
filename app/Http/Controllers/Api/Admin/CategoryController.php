@@ -32,7 +32,7 @@ class CategoryController extends Controller
 
         // Search by name
         if ($search) {
-            $categoriesQuery->where(function($query) use ($search) {
+            $categoriesQuery->where(function ($query) use ($search) {
                 $query->where('name', 'like', "%{$search}%")
                     ->orWhere('name_bn', 'like', "%{$search}%");
             });
@@ -98,8 +98,12 @@ class CategoryController extends Controller
         if ($request->hasFile('image')) {
             $image = $request->file('image');
             $filename = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
-            $path = $image->storeAs('public/categories', $filename);
-            $category->image = $filename;
+
+            // Store to public disk in the categories folder
+            $path = $image->storeAs('categories', $filename, 'public');
+
+            // Save the full path to the database
+            $category->image = $path;
         }
 
         $category->save();
@@ -116,6 +120,8 @@ class CategoryController extends Controller
             ]
         ], 201);
     }
+
+
 
     /**
      * Display the specified category
@@ -206,13 +212,17 @@ class CategoryController extends Controller
         if ($request->hasFile('image')) {
             // Delete old image if exists
             if ($category->image) {
-                Storage::delete('public/categories/' . $category->image);
+                Storage::disk('public')->delete($category->image);
             }
 
             $image = $request->file('image');
             $filename = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
-            $path = $image->storeAs('public/categories', $filename);
-            $category->image = $filename;
+
+            // Store to public disk in the categories folder
+            $path = $image->storeAs('categories', $filename, 'public');
+
+            // Save the full path to the database
+            $category->image = $path;
         }
 
         $category->save();
@@ -351,6 +361,11 @@ class CategoryController extends Controller
         ]);
     }
 
+    /**
+     * Get all parent categories for dropdown
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     /**
      * Get all parent categories for dropdown
      *

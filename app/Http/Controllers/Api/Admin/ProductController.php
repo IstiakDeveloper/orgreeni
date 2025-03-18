@@ -51,7 +51,7 @@ class ProductController extends Controller
         }
 
         if ($search) {
-            $productsQuery->where(function($query) use ($search) {
+            $productsQuery->where(function ($query) use ($search) {
                 $query->where('name', 'like', "%{$search}%")
                     ->orWhere('name_bn', 'like', "%{$search}%")
                     ->orWhere('sku', 'like', "%{$search}%");
@@ -234,7 +234,6 @@ class ProductController extends Controller
                     'product' => $product
                 ]
             ], 201);
-
         } catch (\Exception $e) {
             // Rollback transaction
             DB::rollBack();
@@ -366,7 +365,6 @@ class ProductController extends Controller
                     'product' => $product
                 ]
             ]);
-
         } catch (\Exception $e) {
             // Rollback transaction
             DB::rollBack();
@@ -413,7 +411,6 @@ class ProductController extends Controller
                 'success' => true,
                 'message' => 'Product deleted successfully'
             ]);
-
         } catch (\Exception $e) {
             // Rollback transaction
             DB::rollBack();
@@ -673,7 +670,6 @@ class ProductController extends Controller
                     'variant' => $variant
                 ]
             ], 201);
-
         } catch (\Exception $e) {
             // Rollback transaction
             DB::rollBack();
@@ -785,7 +781,6 @@ class ProductController extends Controller
                 'success' => true,
                 'message' => 'Product variant deleted successfully'
             ]);
-
         } catch (\Exception $e) {
             // Rollback transaction
             DB::rollBack();

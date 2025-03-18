@@ -16,13 +16,10 @@ class BrandController extends Controller
      */
     public function index()
     {
-        $cacheKey = 'brands_all';
+        // Debug করুন
+        \Log::info('Admin brands index method called');
 
-        $brands = Cache::remember($cacheKey, 60 * 60, function () {
-            return Brand::where('is_active', true)
-                ->orderBy('name')
-                ->get();
-        });
+        $brands = Brand::orderBy('name')->get();
 
         return response()->json([
             'success' => true,

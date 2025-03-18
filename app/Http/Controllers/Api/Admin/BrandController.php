@@ -27,7 +27,7 @@ class BrandController extends Controller
 
         // Apply search filter
         if ($search) {
-            $brandsQuery->where(function($query) use ($search) {
+            $brandsQuery->where(function ($query) use ($search) {
                 $query->where('name', 'like', "%{$search}%")
                     ->orWhere('name_bn', 'like', "%{$search}%");
             });
@@ -87,8 +87,12 @@ class BrandController extends Controller
         if ($request->hasFile('logo')) {
             $logo = $request->file('logo');
             $filename = time() . '_' . Str::random(10) . '.' . $logo->getClientOriginalExtension();
-            $path = $logo->storeAs('public/brands', $filename);
-            $brand->logo = $filename;
+
+            // Store file in the public disk
+            $path = $logo->storeAs('brands', $filename, 'public');
+
+            // Set the path correctly for retrieval
+            $brand->logo = $path; // This will store 'brands/filename.jpg' instead of just 'filename.jpg'
         }
 
         $brand->save();
@@ -135,11 +139,10 @@ class BrandController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $brand = Brand::findOrFail($id);
-
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'name_bn' => 'nullable|string|max:255',
+            'slug' => 'required|string|max:255',
             'description' => 'nullable|string',
             'description_bn' => 'nullable|string',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
@@ -154,30 +157,29 @@ class BrandController extends Controller
             ], 422);
         }
 
-        // Update brand
+        $brand = Brand::findOrFail($id);
         $brand->name = $request->name;
         $brand->name_bn = $request->name_bn;
-
-        // Only update slug if name has changed
-        if ($brand->name != $request->name) {
-            $brand->slug = Str::slug($request->name);
-        }
-
+        $brand->slug = $request->slug;
         $brand->description = $request->description;
         $brand->description_bn = $request->description_bn;
         $brand->is_active = $request->is_active ?? $brand->is_active;
 
         // Handle logo upload
         if ($request->hasFile('logo')) {
-            // Delete old logo if exists
+            // Delete old logo if it exists
             if ($brand->logo) {
-                Storage::delete('public/brands/' . $brand->logo);
+                Storage::disk('public')->delete($brand->logo);
             }
 
             $logo = $request->file('logo');
             $filename = time() . '_' . Str::random(10) . '.' . $logo->getClientOriginalExtension();
-            $path = $logo->storeAs('public/brands', $filename);
-            $brand->logo = $filename;
+
+            // Store the file in the public disk under the brands directory
+            $path = $logo->storeAs('brands', $filename, 'public');
+
+            // Save the relative path to the database
+            $brand->logo = $path;
         }
 
         $brand->save();
